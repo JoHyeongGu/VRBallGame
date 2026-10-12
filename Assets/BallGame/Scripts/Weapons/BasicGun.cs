@@ -3,13 +3,7 @@ using DG.Tweening;
 
 public class BasicGun : Weapon
 {
-    [Header("<color=yellow>Gun Settings</color>")]
-    [SerializeField] private float maxRange = 100f;
-    [SerializeField] private LayerMask enemyLayer;
-
     [Header("<color=yellow>Visual Effects</color>")]
-    [SerializeField] private Color lineColor = Color.red;
-    [SerializeField] private LineRenderer laserLine;
     [SerializeField] private ParticleSystem muzzleFlash;
     [SerializeField] private ParticleSystem hitEffectPrefab;
 
@@ -23,14 +17,7 @@ public class BasicGun : Weapon
 
     protected override void Awake()
     {
-        base.Awake();
-
-        if (laserLine == null)
-        {
-            laserLine = GetComponent<LineRenderer>();
-            if (laserLine == null) laserLine = gameObject.AddComponent<LineRenderer>();
-        }
-        SetupLaserLine();
+        base.Awake(); // Weapon 클래스의 Awake 실행 (조준선 초기화 포함)
 
         if (hitEffectPrefab != null)
         {
@@ -44,35 +31,28 @@ public class BasicGun : Weapon
         }
     }
 
-    private void Update()
+    protected override void InitializeUpgrades()
     {
-        UpdateLaserSight();
-    }
-
-    private void SetupLaserLine()
-    {
-        laserLine.useWorldSpace = true;
-        laserLine.positionCount = 2;
-        laserLine.startWidth = 0.005f;
-        laserLine.endWidth = 0.005f;
-        laserLine.startColor = lineColor;
-        laserLine.endColor = lineColor;
-    }
-
-    private void UpdateLaserSight()
-    {
-        if (firePoint == null || laserLine == null) return;
-
-        Vector3 startPos = firePoint.position;
-        Vector3 endPos = startPos + (firePoint.forward * maxRange);
-
-        if (Physics.Raycast(startPos, firePoint.forward, out RaycastHit hit, maxRange, enemyLayer))
+        AvailableUpgrades.Add(new UpgradeOption("Max Bullet UP", "최대 탄창 +5", weaponUpgradeColor, () =>
         {
-            endPos = hit.point;
-        }
+            maxBullet += 5;
+            currentBullet += 5;
+        }));
 
-        laserLine.SetPosition(0, startPos);
-        laserLine.SetPosition(1, endPos);
+        AvailableUpgrades.Add(new UpgradeOption("Damage UP", "공격력 +5", weaponUpgradeColor, () =>
+        {
+            damage += 5;
+        }));
+
+        AvailableUpgrades.Add(new UpgradeOption("Fire Rate UP", "발사 간격 감소", weaponUpgradeColor, () =>
+        {
+            atkInterval = Mathf.Max(0.05f, atkInterval - 0.05f);
+        }));
+
+        AvailableUpgrades.Add(new UpgradeOption("Reload Speed UP", "재장전 시간 감소", weaponUpgradeColor, () =>
+        {
+            cooltime = Mathf.Max(0.1f, cooltime - 0.3f);
+        }));
     }
 
     protected override void AttackAction()
@@ -83,6 +63,7 @@ public class BasicGun : Weapon
         if (muzzleFlash != null)
             muzzleFlash.Play();
 
+        // 부모 클래스의 maxRange와 enemyLayer를 그대로 활용
         if (Physics.Raycast(startPos, forwardDir, out RaycastHit hit, maxRange, enemyLayer))
         {
             if (hit.collider.TryGetComponent<Enemy>(out var enemy))

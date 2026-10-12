@@ -1,0 +1,8 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="ExpBar" src="project://database/Assets/BallGame/UIToolkit/Player/ExpBar.uxml?fileID=9197481963319205126&amp;guid=f2a5c97355f8c8c4b80151c947ef87f7&amp;type=3#ExpBar"/>
+    <ui:Template name="UpgradeUI" src="project://database/Assets/BallGame/UIToolkit/Player/UpgradeUI.uxml?fileID=9197481963319205126&amp;guid=b546f64f869d74647b546657563cbd24&amp;type=3#UpgradeUI"/>
+    <ui:VisualElement name="Root" style="flex-grow: 1;">
+        <ui:Instance template="ExpBar" style="height: 5px; width: 100%;"/>
+        <ui:Instance template="UpgradeUI" style="width: 100%; height: 100%;"/>
+    </ui:VisualElement>
+</ui:UXML>

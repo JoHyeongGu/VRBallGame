@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -25,27 +26,88 @@ public class Player : MonoBehaviour
     [SerializeField] private int currentExp = 0;
     [SerializeField] private int maxExp = 100;
     [SerializeField] private float magnetRadius = 4f;
-    [SerializeField] private LayerMask gemLayer;
+    [SerializeField] private LayerMask expLayer;
 
     [Header("<color=yellow>UI</color>")]
     [SerializeField] private UIDocument magnetAreaUI;
     [SerializeField] private UIDocument expOverlayUI;
+    [SerializeField] private Color playerUpgradeColor = new Color(0.3f, 0.5f, 0.8f, 1f);
+
+    public List<UpgradeOption> AvailableUpgrades { get; private set; } = new List<UpgradeOption>();
 
     private bool isDashing = false;
     private float lastDashTime = -999f;
     private Collider[] hitGems = new Collider[20];
-
     private VisualElement expBarFill;
     private Label levelLabel;
 
     private void Start()
     {
+        InitializeUpgrades();
         UpdateMagnetAreaUI();
         InitializeExpUI();
     }
 
+    private void InitializeUpgrades()
+    {
+        AvailableUpgrades.Add(new UpgradeOption("Dash Cooldown DOWN", "대시 쿨타임 감소", playerUpgradeColor, () =>
+        {
+            dashCooldown = Mathf.Max(0.1f, dashCooldown - 0.2f);
+        }));
+
+        AvailableUpgrades.Add(new UpgradeOption("Dash Distance UP", "대시 거리 증가", playerUpgradeColor, () =>
+        {
+            dashDistance += 1f;
+        }));
+
+        AvailableUpgrades.Add(new UpgradeOption("Magnet Range UP", "경험치 획득 범위 증가", playerUpgradeColor, () =>
+        {
+            magnetRadius += 1.5f;
+            UpdateMagnetAreaUI();
+        }));
+    }
+
+    public List<UpgradeOption> GetAllWeaponUpgrades()
+    {
+        List<UpgradeOption> weaponUpgrades = new List<UpgradeOption>(20);
+
+        bool isSameWeaponType = (leftWeapon != null && rightWeapon != null) &&
+                                (leftWeapon.GetType() == rightWeapon.GetType());
+
+        if (isSameWeaponType)
+        {
+            int upgradeCount = Mathf.Min(leftWeapon.AvailableUpgrades.Count, rightWeapon.AvailableUpgrades.Count);
+
+            for (int i = 0; i < upgradeCount; i++)
+            {
+                UpgradeOption leftOpt = leftWeapon.AvailableUpgrades[i];
+                UpgradeOption rightOpt = rightWeapon.AvailableUpgrades[i];
+
+                weaponUpgrades.Add(new UpgradeOption(
+                    leftOpt.Title + " (Dual)",
+                    leftOpt.Description,
+                    leftOpt.ButtonColor,
+                    () =>
+                    {
+                        leftOpt.ApplyAction?.Invoke();
+                        rightOpt.ApplyAction?.Invoke();
+                    }
+                ));
+            }
+        }
+        else
+        {
+            if (leftWeapon != null) weaponUpgrades.AddRange(leftWeapon.AvailableUpgrades);
+            if (rightWeapon != null) weaponUpgrades.AddRange(rightWeapon.AvailableUpgrades);
+        }
+
+        return weaponUpgrades;
+    }
+
     private void Update()
     {
+        if (Time.timeScale == 0f) return;
+
         if (leftTrigger.action.IsPressed() && leftWeapon != null) leftWeapon.TryAttack();
         if (rightTrigger.action.IsPressed() && rightWeapon != null) rightWeapon.TryAttack();
 
@@ -53,12 +115,12 @@ public class Player : MonoBehaviour
         CheckMagnet();
     }
 
+
     private void CheckDashInput()
     {
         if (isDashing || Time.time - lastDashTime < dashCooldown) return;
 
         Vector2 joystickValue = rightJoystick.action.ReadValue<Vector2>();
-
         if (joystickValue.y > 0.7f)
         {
             StartDash();
@@ -88,13 +150,12 @@ public class Player : MonoBehaviour
             timer += Time.deltaTime;
             yield return null;
         }
-
         isDashing = false;
     }
 
     private void CheckMagnet()
     {
-        int count = Physics.OverlapSphereNonAlloc(transform.position, magnetRadius, hitGems, gemLayer);
+        int count = Physics.OverlapSphereNonAlloc(transform.position, magnetRadius, hitGems, expLayer);
         for (int i = 0; i < count; i++)
         {
             if (hitGems[i].TryGetComponent<Exp>(out var exp))
@@ -122,6 +183,11 @@ public class Player : MonoBehaviour
 
         UpdateMagnetAreaUI();
         UpdateExpUI();
+
+        if (UpgradeManager.Instance != null)
+        {
+            UpgradeManager.Instance.ShowUpgradeUI();
+        }
     }
 
     private void UpdateMagnetAreaUI()
@@ -149,10 +215,15 @@ public class Player : MonoBehaviour
             float percent = Mathf.Clamp01((float)currentExp / maxExp) * 100f;
             expBarFill.style.width = new Length(percent, LengthUnit.Percent);
         }
-
         if (levelLabel != null)
         {
             levelLabel.text = $"Lv.{currentLevel}";
         }
+    }
+
+    public void SetActiveWeapon(bool isActive)
+    {
+        if (leftWeapon != null) leftWeapon.gameObject.SetActive(isActive);
+        if (rightWeapon != null) rightWeapon.gameObject.SetActive(isActive);
     }
 }
