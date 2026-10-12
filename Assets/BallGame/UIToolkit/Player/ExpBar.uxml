@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="ExpBarRect" style="flex-grow: 1; background-color: rgba(255, 255, 255, 0.47); border-top-left-radius: 10%; border-top-right-radius: 10%; border-bottom-right-radius: 10%; border-bottom-left-radius: 10%;">
+        <ui:VisualElement name="ExpBarFill" style="flex-grow: 1; background-color: rgb(255, 162, 0); border-top-left-radius: 10%; border-top-right-radius: 10%; border-bottom-right-radius: 10%; border-bottom-left-radius: 10%;"/>
+        <ui:Label text="5" name="LevelLabel" style="position: absolute; -unity-text-align: middle-center; font-size: 20px; color: rgb(255, 255, 255); top: 10px; bottom: 10px; right: 0; left: 0; flex-shrink: 1;"/>
+    </ui:VisualElement>
+</ui:UXML>
