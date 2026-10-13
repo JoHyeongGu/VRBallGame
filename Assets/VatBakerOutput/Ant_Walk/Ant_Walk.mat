@@ -8,13 +8,11 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Ant_Walk
-  m_Shader: {fileID: 4800000, guid: 83f041c80a40db54d9ae7f3ddbdd4694, type: 3}
+  m_Shader: {fileID: 4800000, guid: 481a6342e075c7241bbaa4a3ed355f13, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _VATLOOP0_ON
-  - _VATLOOP1_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -25,44 +23,27 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 170c064d5f7e52e429820eb5f9c6e6f3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _BumpMap:
+    - _NormalTex:
         m_Texture: {fileID: 2800000, guid: 8bbaee42f6c6fcc47b4b700da0d3ce1d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _VatNormTex0:
-        m_Texture: {fileID: 0}
+    - _VatNormalTex:
+        m_Texture: {fileID: 2800000, guid: 6cf7cf64b1b4ff644836ea3a3be575c7, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _VatNormTex1:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _VatPosTex0:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _VatPosTex1:
-        m_Texture: {fileID: 0}
+    - _VatPositionTex:
+        m_Texture: {fileID: 2800000, guid: c1d3ba57a60f38740817566afb41e66e, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BumpScale: 1
-    - _CurrentAnimIndex: 0
-    - _Metallic: 0
-    - _Smoothness: 0
-    - _StartTime0: 0
-    - _StartTime1: 0
-    - _TransitionDuration: 0.25
-    - _TransitionStartTime: -10
-    - _VatAnimFps: 12
-    - _VatLoop0: 1
-    - _VatLoop1: 1
-    m_Colors:
-    - _BaseColor: {r: 0.9, g: 0.7, b: 0.39999998, a: 1}
+    - _AnimationTimeOffset: 0
+    - _VatAnimFps: 15
+    - _VatAnimLength: 0.5
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1

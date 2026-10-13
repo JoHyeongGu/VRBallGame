@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-1243374450786207643
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
-  version: 10
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -20,14 +7,15 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_Ant
-  m_Shader: {fileID: 4800000, guid: 5af78e67a1d66ba4ea43d68d51e4a41f, type: 3}
+  m_Name: M_Ant_VAT
+  m_Shader: {fileID: 4800000, guid: 83f041c80a40db54d9ae7f3ddbdd4694, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _ENABLEVAT0_ON
+  - _ENABLEVAT1_ON
   - _VATLOOP0_ON
-  - _VATLOOP1_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -46,7 +34,7 @@ Material:
     - _BumpMap:
         m_Texture: {fileID: 2800000, guid: 8bbaee42f6c6fcc47b4b700da0d3ce1d, type: 3}
         m_Scale: {x: 0.4, y: 0.4}
-        m_Offset: {x: 0.21, y: 0}
+        m_Offset: {x: -0.28, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -84,19 +72,19 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _VatNormTex0:
-        m_Texture: {fileID: 2800000, guid: 6bf5c69f01769494f945311e7ae9da7b, type: 2}
+        m_Texture: {fileID: 2800000, guid: 6cf7cf64b1b4ff644836ea3a3be575c7, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _VatNormTex1:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 191608f8a20e4d8428eea2996ee0693a, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _VatPosTex0:
-        m_Texture: {fileID: 2800000, guid: 3af205cc87d3e3a419000ae48cfd8f59, type: 2}
+        m_Texture: {fileID: 2800000, guid: c1d3ba57a60f38740817566afb41e66e, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _VatPosTex1:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 602a80a693bcfe44c93742baa0d9be5b, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -118,7 +106,7 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
-    - _BumpScale: 1
+    - _BumpScale: 0.9
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -128,17 +116,19 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EnableVat0: 1
+    - _EnableVat1: 1
     - _EnvironmentReflections: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Metallic: 0
+    - _Metallic: 0.13
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.437
+    - _Smoothness: 0.372
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -146,12 +136,12 @@ Material:
     - _StartTime0: 0
     - _StartTime1: 0
     - _Surface: 0
-    - _TransitionDuration: 0.25
+    - _TransitionDuration: 0.1
     - _TransitionStartTime: -10
     - _UVSec: 0
     - _VatAnimFps: 15
     - _VatLoop0: 1
-    - _VatLoop1: 1
+    - _VatLoop1: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
@@ -160,5 +150,20 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _VatOffset: {r: 0, g: 0.3, b: -0.7, a: 0}
+    - _VatRotation: {r: 90, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!114 &1403103820594096709
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10

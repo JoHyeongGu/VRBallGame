@@ -13,17 +13,23 @@ Shader "Custom/ClayShader_VAT"
         _Smoothness ("Smoothness", Range(0, 1)) = 0.0
         _Metallic ("Metallic", Range(0, 1)) = 0.0
 
+        [Header(VAT Alignment (Match Outline))]
+        _VatRotation ("Rotation Correction (X,Y,Z)", Vector) = (0, 0, 0, 0)
+        _VatOffset ("Position Offset (X,Y,Z)", Vector) = (0, 0, 0, 0)
+        
         [Header(VAT General Settings)]
         _VatAnimFps ("VAT Animation FPS", Float) = 15.0
         _TransitionDuration ("Transition Duration (Sec)", Range(0.01, 2.0)) = 0.25
         [Enum(Slot 0, 0, Slot 1, 1)] _CurrentAnimIndex ("Current Anim Slot", Float) = 0.0
         
         [Header(VAT Slot 0)]
+        [Toggle] _EnableVat0 ("Enable Slot 0 VAT", Float) = 1.0
         [Toggle] _VatLoop0 ("Slot 0 Loop", Float) = 1.0
         _VatPosTex0 ("Slot 0 Pos Tex", 2D) = "black" {}
         _VatNormTex0 ("Slot 0 Norm Tex", 2D) = "black" {}
         
         [Header(VAT Slot 1)]
+        [Toggle] _EnableVat1 ("Enable Slot 1 VAT", Float) = 0.0
         [Toggle] _VatLoop1 ("Slot 1 Loop", Float) = 1.0
         _VatPosTex1 ("Slot 1 Pos Tex", 2D) = "black" {}
         _VatNormTex1 ("Slot 1 Norm Tex", 2D) = "black" {}
@@ -58,6 +64,9 @@ Shader "Custom/ClayShader_VAT"
             float _VatAnimFps;
             float _TransitionDuration;
 
+            float4 _VatRotation; // 추가됨
+            float4 _VatOffset;   // 추가됨
+
             float4 _VatPosTex0_TexelSize;
             float4 _VatPosTex1_TexelSize;
         CBUFFER_END
@@ -65,15 +74,33 @@ Shader "Custom/ClayShader_VAT"
         UNITY_INSTANCING_BUFFER_START(Props)
             UNITY_DEFINE_INSTANCED_PROP(float, _CurrentAnimIndex)
             UNITY_DEFINE_INSTANCED_PROP(float, _TransitionStartTime)
+            
+            UNITY_DEFINE_INSTANCED_PROP(float, _EnableVat0)
             UNITY_DEFINE_INSTANCED_PROP(float, _VatLoop0)
-            UNITY_DEFINE_INSTANCED_PROP(float, _VatLoop1)
             UNITY_DEFINE_INSTANCED_PROP(float, _StartTime0)
+            
+            UNITY_DEFINE_INSTANCED_PROP(float, _EnableVat1)
+            UNITY_DEFINE_INSTANCED_PROP(float, _VatLoop1)
             UNITY_DEFINE_INSTANCED_PROP(float, _StartTime1)
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        // Core.hlsl의 sampler_PointClamp 중복 선언 에러 방지를 위해 슬롯별 전용 샘플러 사용
         TEXTURE2D(_VatPosTex0); SAMPLER(sampler_VatPosTex0); TEXTURE2D(_VatNormTex0);
         TEXTURE2D(_VatPosTex1); SAMPLER(sampler_VatPosTex1); TEXTURE2D(_VatNormTex1);
+
+        // 오일러 각도(X, Y, Z)를 회전 행렬로 변환하는 함수
+        float3x3 GetEulerRotationMatrix(float3 eulerAngles)
+        {
+            float3 r = radians(eulerAngles);
+            float cx = cos(r.x), sx = sin(r.x);
+            float cy = cos(r.y), sy = sin(r.y);
+            float cz = cos(r.z), sz = sin(r.z);
+
+            float3x3 rotX = float3x3(1, 0, 0, 0, cx, -sx, 0, sx, cx);
+            float3x3 rotY = float3x3(cy, 0, sy, 0, 1, 0, -sy, 0, cy);
+            float3x3 rotZ = float3x3(cz, -sz, 0, sz, cz, 0, 0, 0, 1);
+
+            return mul(rotZ, mul(rotY, rotX));
+        }
 
         void ApplyVatAnimation(uint vertexID, inout float3 positionOS, inout float3 normalOS)
         {
@@ -81,33 +108,52 @@ Shader "Custom/ClayShader_VAT"
 
             float targetSlot = UNITY_ACCESS_INSTANCED_PROP(Props, _CurrentAnimIndex);
             float transStart = UNITY_ACCESS_INSTANCED_PROP(Props, _TransitionStartTime);
+            
+            float enable0    = UNITY_ACCESS_INSTANCED_PROP(Props, _EnableVat0);
             float loop0      = UNITY_ACCESS_INSTANCED_PROP(Props, _VatLoop0);
-            float loop1      = UNITY_ACCESS_INSTANCED_PROP(Props, _VatLoop1);
             float start0     = UNITY_ACCESS_INSTANCED_PROP(Props, _StartTime0);
+            
+            float enable1    = UNITY_ACCESS_INSTANCED_PROP(Props, _EnableVat1);
+            float loop1      = UNITY_ACCESS_INSTANCED_PROP(Props, _VatLoop1);
             float start1     = UNITY_ACCESS_INSTANCED_PROP(Props, _StartTime1);
 
-            // 1. Slot 0 샘플링
             float totalFrames0 = _VatPosTex0_TexelSize.w;
             float rawFrame0 = max(0.0, floor((currentTime - start0) * _VatAnimFps));
             float frame0 = (loop0 > 0.5) ? fmod(rawFrame0, totalFrames0) : clamp(rawFrame0, 0.0, max(0.0, totalFrames0 - 1.0));
             float2 uv0 = float2((vertexID + 0.5) * _VatPosTex0_TexelSize.x, (frame0 + 0.5) * _VatPosTex0_TexelSize.y);
-            float3 pos0 = SAMPLE_TEXTURE2D_LOD(_VatPosTex0, sampler_VatPosTex0, uv0, 0).xyz;
-            float3 norm0 = SAMPLE_TEXTURE2D_LOD(_VatNormTex0, sampler_VatPosTex0, uv0, 0).xyz;
+            
+            float3 sampledPos0 = SAMPLE_TEXTURE2D_LOD(_VatPosTex0, sampler_VatPosTex0, uv0, 0).xyz;
+            float3 sampledNorm0 = SAMPLE_TEXTURE2D_LOD(_VatNormTex0, sampler_VatPosTex0, uv0, 0).xyz;
+            
+            float3 pos0 = lerp(positionOS, sampledPos0, enable0);
+            float3 norm0 = lerp(normalOS, sampledNorm0, enable0);
 
-            // 2. Slot 1 샘플링
             float totalFrames1 = _VatPosTex1_TexelSize.w;
             float rawFrame1 = max(0.0, floor((currentTime - start1) * _VatAnimFps));
             float frame1 = (loop1 > 0.5) ? fmod(rawFrame1, totalFrames1) : clamp(rawFrame1, 0.0, max(0.0, totalFrames1 - 1.0));
             float2 uv1 = float2((vertexID + 0.5) * _VatPosTex1_TexelSize.x, (frame1 + 0.5) * _VatPosTex1_TexelSize.y);
-            float3 pos1 = SAMPLE_TEXTURE2D_LOD(_VatPosTex1, sampler_VatPosTex1, uv1, 0).xyz;
-            float3 norm1 = SAMPLE_TEXTURE2D_LOD(_VatNormTex1, sampler_VatPosTex1, uv1, 0).xyz;
+            
+            float3 sampledPos1 = SAMPLE_TEXTURE2D_LOD(_VatPosTex1, sampler_VatPosTex1, uv1, 0).xyz;
+            float3 sampledNorm1 = SAMPLE_TEXTURE2D_LOD(_VatNormTex1, sampler_VatPosTex1, uv1, 0).xyz;
 
-            // 3. 시간에 따른 자동 블렌딩 가중치 계산
+            float3 pos1 = lerp(positionOS, sampledPos1, enable1);
+            float3 norm1 = lerp(normalOS, sampledNorm1, enable1);
+
             float progress = saturate((currentTime - transStart) / max(0.0001, _TransitionDuration));
             float blendWeight = (targetSlot > 0.5) ? progress : (1.0 - progress);
 
-            positionOS = lerp(pos0, pos1, blendWeight);
-            normalOS = normalize(lerp(norm0, norm1, blendWeight));
+            float3 finalPosOS = lerp(pos0, pos1, blendWeight);
+            float3 finalNormOS = normalize(lerp(norm0, norm1, blendWeight));
+
+            float3x3 rotMatrix = GetEulerRotationMatrix(_VatRotation.xyz);
+            
+            finalPosOS = mul(rotMatrix, finalPosOS);
+            finalNormOS = mul(rotMatrix, finalNormOS);
+
+            finalPosOS += _VatOffset.xyz;
+
+            positionOS = finalPosOS;
+            normalOS = finalNormOS;
         }
         ENDHLSL
 
@@ -167,7 +213,7 @@ Shader "Custom/ClayShader_VAT"
                     length(GetObjectToWorldMatrix()[2].xyz)
                 ), 0.0001);
                 
-                float3 scaledPos = input.positionOS.xyz * objScale;
+                float3 scaledPos = input.positionOS.xyz * objScale; 
 
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
                 output.positionHCS = vertexInput.positionCS;
@@ -190,7 +236,7 @@ Shader "Custom/ClayShader_VAT"
 
                 half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv) * _BaseColor;
                 
-                float2 bumpUvX = posOS.zy * _BumpMap_ST.xy + _BumpMap_ST.zw;
+                float2 bumpUvX = posOS.zy * _BumpMap_ST.xy + _BumpMap_ST.zw; 
                 float2 bumpUvY = posOS.xz * _BumpMap_ST.xy + _BumpMap_ST.zw;
                 float2 bumpUvZ = posOS.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
 
