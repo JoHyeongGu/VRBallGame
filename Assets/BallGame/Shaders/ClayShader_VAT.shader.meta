@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 83f041c80a40db54d9ae7f3ddbdd4694
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _BaseMap: {instanceID: 0}
+  - _BumpMap: {fileID: 2800000, guid: 8bbaee42f6c6fcc47b4b700da0d3ce1d, type: 3}
+  - _NoiseTex: {fileID: 2800000, guid: c3a013dfb8c988b4db2e3e40ffa87638, type: 3}
+  - _VatPosTex0: {instanceID: 0}
+  - _VatNormTex0: {instanceID: 0}
+  - _VatPosTex1: {instanceID: 0}
+  - _VatNormTex1: {instanceID: 0}
+  - _VatPosTex2: {instanceID: 0}
+  - _VatNormTex2: {instanceID: 0}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
